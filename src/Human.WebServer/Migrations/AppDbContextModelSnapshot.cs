@@ -23,13 +23,82 @@ namespace Human.WebServer.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Human.Domain.Models.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Instant>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<Guid?>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Instant>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("Human.Domain.Models.Post", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Instant>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<Guid>("InitialMessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Instant>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InitialMessageId")
+                        .IsUnique();
+
+                    b.ToTable("Posts");
+                });
+
             modelBuilder.Entity("Human.Domain.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Instant>("CreationTime")
+                    b.Property<Instant>("CreatedTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("current_timestamp");
@@ -44,7 +113,7 @@ namespace Human.WebServer.Migrations
                         .HasMaxLength(61)
                         .HasColumnType("character varying(61)");
 
-                    b.Property<Instant>("UpdatingTime")
+                    b.Property<Instant>("UpdatedTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("current_timestamp");
@@ -59,11 +128,11 @@ namespace Human.WebServer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1e0e515a-89a5-4c64-8e46-4f4b205152e2"),
-                            CreationTime = NodaTime.Instant.FromUnixTimeTicks(0L),
+                            Id = new Guid("20d882af-7730-4830-81ff-126c42db25a4"),
+                            CreatedTime = NodaTime.Instant.FromUnixTimeTicks(0L),
                             Email = "admin@gmail.com",
-                            PasswordHash = "$2a$11$lPeb4b1JjmkmQEceZPlmHe0AYxIHl.jeKMUu81kVTqtgzdwmm/K0y",
-                            UpdatingTime = NodaTime.Instant.FromUnixTimeTicks(0L)
+                            PasswordHash = "$2a$11$oiMWNES7pT5jpqdD7oXwC.HMaRCs1eHntdxraCxgj2n7LccODbtLK",
+                            UpdatedTime = NodaTime.Instant.FromUnixTimeTicks(0L)
                         });
                 });
 
@@ -103,9 +172,56 @@ namespace Human.WebServer.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("1e0e515a-89a5-4c64-8e46-4f4b205152e2"),
+                            UserId = new Guid("20d882af-7730-4830-81ff-126c42db25a4"),
                             Permission = "create_user"
                         });
+                });
+
+            modelBuilder.Entity("Human.Domain.Models.UserRefreshToken", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Token")
+                        .HasColumnType("uuid");
+
+                    b.Property<Instant>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Instant>("ExpiryTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "Token");
+
+                    b.ToTable("UserRefreshTokens");
+                });
+
+            modelBuilder.Entity("Human.Domain.Models.Message", b =>
+                {
+                    b.HasOne("Human.Domain.Models.Post", "Post")
+                        .WithOne()
+                        .HasForeignKey("Human.Domain.Models.Message", "PostId");
+
+                    b.HasOne("Human.Domain.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("Human.Domain.Models.Message", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Human.Domain.Models.Post", b =>
+                {
+                    b.HasOne("Human.Domain.Models.Message", "InitialMessage")
+                        .WithOne()
+                        .HasForeignKey("Human.Domain.Models.Post", "InitialMessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("InitialMessage");
                 });
 
             modelBuilder.Entity("Human.Domain.Models.UserPasswordResetToken", b =>
@@ -120,6 +236,17 @@ namespace Human.WebServer.Migrations
                 });
 
             modelBuilder.Entity("Human.Domain.Models.UserPermission", b =>
+                {
+                    b.HasOne("Human.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Human.Domain.Models.UserRefreshToken", b =>
                 {
                     b.HasOne("Human.Domain.Models.User", "User")
                         .WithMany()
