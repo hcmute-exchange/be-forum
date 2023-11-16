@@ -11,6 +11,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<UserPasswordResetToken> UserPasswordResetTokens => Set<UserPasswordResetToken>();
     public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
     public DbSet<UserRefreshToken> UserRefreshTokens => Set<UserRefreshToken>();
+    public DbSet<Message> Messages => Set<Message>();
+    public DbSet<Post> Posts => Set<Post>();
 
     public AppDbContext(DbContextOptions options) : base(options) { }
 
