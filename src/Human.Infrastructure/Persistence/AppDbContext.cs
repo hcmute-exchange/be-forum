@@ -15,7 +15,9 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<Tag> Tags => Set<Tag>();
 
-    public AppDbContext(DbContextOptions options) : base(options) { }
+    public AppDbContext(DbContextOptions options) : base(options)
+    {
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,10 +31,12 @@ public class AppDbContext : DbContext, IAppDbContext
             PasswordHash = BCrypt.Net.BCrypt.EnhancedHashPassword("admin")
         };
         modelBuilder.Entity<User>().HasData(user);
-        modelBuilder.Entity<UserPermission>().HasData(new
-        {
-            UserId = user.Id,
-            Permission = Permit.CreateUser
-        });
+        modelBuilder.Entity<UserPermission>().HasData(
+            new[] { Permit.CreateUser }
+                .Select(x => new
+                {
+                    UserId = user.Id,
+                    Permission = x
+                }));
     }
 }

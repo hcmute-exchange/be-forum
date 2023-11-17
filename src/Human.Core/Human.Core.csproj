@@ -16,6 +16,7 @@
     <PackageReference Include="MailKit" />
     <PackageReference Include="RazorLight" />
     <PackageReference Include="Riok.Mapperly" />
+    <PackageReference Include="SystemTextJsonPatch" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +26,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Human.Domain\Human.Domain.csproj" />
   </ItemGroup>
-
-
 
 </Project>
