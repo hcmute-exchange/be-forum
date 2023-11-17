@@ -2,8 +2,6 @@
 using System.Net;
 using FastEndpoints;
 using FluentResults;
-using Human.Core.Features.Posts.CreatePost;
-using Human.Core.Features.PostTags.CreatePostTag;
 using Human.Core.Interfaces;
 using Human.Domain.Models;
 namespace Human.Core.Features.Posts.CreatePost;
@@ -35,11 +33,7 @@ public sealed class CreatePostHandler : ICommandHandler<CreatePostCommand, Resul
                 Id = id
             };
             dbContext.Attach(tag);
-            dbContext.Add(new PostTag
-            {
-                Tag = tag,
-                Post = post
-            });
+            post.Tags.Add(tag);
         }
         dbContext.Add(post);
         await dbContext.SaveChangesAsync(ct).ConfigureAwait(false);
