@@ -54,8 +54,7 @@ namespace Human.WebServer.Migrations
                     b.HasIndex("PostId")
                         .IsUnique();
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
@@ -79,6 +78,9 @@ namespace Human.WebServer.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
+                    b.Property<Guid>("Tag")
+                        .HasColumnType("uuid");
+
                     b.Property<Instant>("UpdatedTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -90,6 +92,31 @@ namespace Human.WebServer.Migrations
                         .IsUnique();
 
                     b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("Human.Domain.Models.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Instant>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Instant>("UpdatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Human.Domain.Models.User", b =>
@@ -128,10 +155,10 @@ namespace Human.WebServer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("20d882af-7730-4830-81ff-126c42db25a4"),
+                            Id = new Guid("700a5310-c6ec-4b16-b759-b89ee236cac5"),
                             CreatedTime = NodaTime.Instant.FromUnixTimeTicks(0L),
                             Email = "admin@gmail.com",
-                            PasswordHash = "$2a$11$oiMWNES7pT5jpqdD7oXwC.HMaRCs1eHntdxraCxgj2n7LccODbtLK",
+                            PasswordHash = "$2a$11$1BqcktbbYTLE78jKnUYkRuM5ZJLrmzUJ5pfyL61DwVAUEav6RGPC.",
                             UpdatedTime = NodaTime.Instant.FromUnixTimeTicks(0L)
                         });
                 });
@@ -172,7 +199,7 @@ namespace Human.WebServer.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("20d882af-7730-4830-81ff-126c42db25a4"),
+                            UserId = new Guid("700a5310-c6ec-4b16-b759-b89ee236cac5"),
                             Permission = "create_user"
                         });
                 });
@@ -196,6 +223,21 @@ namespace Human.WebServer.Migrations
                     b.ToTable("UserRefreshTokens");
                 });
 
+            modelBuilder.Entity("PostTag", b =>
+                {
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TagsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PostId", "TagsId");
+
+                    b.HasIndex("TagsId");
+
+                    b.ToTable("PostTag");
+                });
+
             modelBuilder.Entity("Human.Domain.Models.Message", b =>
                 {
                     b.HasOne("Human.Domain.Models.Post", "Post")
@@ -203,8 +245,8 @@ namespace Human.WebServer.Migrations
                         .HasForeignKey("Human.Domain.Models.Message", "PostId");
 
                     b.HasOne("Human.Domain.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("Human.Domain.Models.Message", "UserId")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -255,6 +297,21 @@ namespace Human.WebServer.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PostTag", b =>
+                {
+                    b.HasOne("Human.Domain.Models.Post", null)
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Human.Domain.Models.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
