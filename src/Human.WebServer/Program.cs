@@ -43,7 +43,7 @@ public static class Program
     private static void Configure(IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JsonOptions>(x => x.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb));
-        services.Configure<JsonOptions>(x => x.SerializerOptions.Converters.Add(new Base64GuidJsonConverter()));
+        // services.Configure<JsonOptions>(x => x.SerializerOptions.Converters.Add(new Base64GuidJsonConverter()));
         services.AddProblemDetails();
         services.AddFastEndpoints(x =>
         {
