@@ -17,6 +17,9 @@ public sealed class PostEntityConfiguration : IEntityTypeConfiguration<Post>
         builder.Property(x => x.Subject).HasMaxLength(128).IsRequired();
         builder.Property<Guid>("InitialMessageId").IsRequired();
         builder.HasOne(x => x.InitialMessage).WithOne().HasForeignKey<Post>("InitialMessageId").IsRequired();
+        builder.Property<Guid>("Tag").IsRequired();
+        builder.HasMany(x => x.Tags).WithMany();
         builder.Navigation(x => x.InitialMessage).UsePropertyAccessMode(PropertyAccessMode.Property);
+        builder.Navigation(x => x.Tags).UsePropertyAccessMode(PropertyAccessMode.Property);
     }
 }

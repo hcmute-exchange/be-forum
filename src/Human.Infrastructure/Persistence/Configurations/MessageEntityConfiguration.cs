@@ -18,7 +18,7 @@ public sealed class MessageEntityConfiguration : IEntityTypeConfiguration<Messag
         builder.Property<Guid?>("PostId");
         builder.Property<Guid>("UserId").IsRequired();
         builder.HasOne(x => x.Post).WithOne().HasForeignKey<Message>("PostId");
-        builder.HasOne(x => x.User).WithOne().HasForeignKey<Message>("UserId").IsRequired();
+        builder.HasOne(x => x.User).WithMany().HasForeignKey("UserId").IsRequired();
         builder.Navigation(x => x.Post).UsePropertyAccessMode(PropertyAccessMode.Property);
         builder.Navigation(x => x.User).UsePropertyAccessMode(PropertyAccessMode.Property);
     }
