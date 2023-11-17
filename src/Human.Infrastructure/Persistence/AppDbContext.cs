@@ -13,6 +13,7 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<UserRefreshToken> UserRefreshTokens => Set<UserRefreshToken>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Post> Posts => Set<Post>();
+    public DbSet<Tag> Tags => Set<Tag>();
 
     public AppDbContext(DbContextOptions options) : base(options) { }
 
