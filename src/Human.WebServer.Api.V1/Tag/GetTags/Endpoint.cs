@@ -12,6 +12,7 @@ internal sealed class Endpoint : Endpoint<Request, Response>
         Get("tags");
         Verbs(Http.GET);
         Version(1);
+        AllowAnonymous();
     }
 
     public override async Task<Response> ExecuteAsync(Request req, CancellationToken ct)

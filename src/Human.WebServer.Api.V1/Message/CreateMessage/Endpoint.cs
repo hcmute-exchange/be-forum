@@ -1,5 +1,6 @@
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Human.WebServer.Api.V1.Messages.CreateMessage;
 
@@ -16,6 +17,7 @@ internal sealed class Endpoint : Endpoint<Request, Response>
 
     public override async Task<Response> ExecuteAsync(Request req, CancellationToken ct)
     {
+        Console.Write(req.UserId);
         var result = await req.ToCommand().ExecuteAsync(ct).ConfigureAwait(false);
         if (result.IsFailed)
         {

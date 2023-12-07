@@ -13,6 +13,7 @@ public class Base64GuidJsonConverter : JsonConverter<Guid>
         JsonSerializerOptions options)
     {
         var value = reader.GetString()!;
+        Console.WriteLine("value" + value);
         if (Guid.TryParseExact(value, "D", out var guid))
         {
             return guid;

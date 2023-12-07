@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
         {
             var options = provider.GetRequiredService<IOptions<PersistenceOptions>>().Value;
             builder
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
                 .UseNpgsql(
                     options.ConnectionString,
                     builder => builder.UseNodaTime().MigrationsAssembly(options.MigrationsAssembly))

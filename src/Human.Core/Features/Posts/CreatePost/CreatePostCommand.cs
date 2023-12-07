@@ -9,8 +9,10 @@ namespace Human.Core.Features.Posts.CreatePost;
 public class CreatePostCommand : ICommand<Result<CreatePostResult>>
 {
     public required string Subject { get; set; }
-    public required CreateMessageCommand InitialMessage { get; set; }
-    public required Guid[] TagIds { get; set; }
+    public required string Body { get; set; }
+    public required Tag[] Tags { get; set; }
+    public required Guid UserId { get; set; }
+
 }
 
 [Mapper]

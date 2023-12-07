@@ -11,6 +11,7 @@ internal sealed class Endpoint : Endpoint<GetPostsRequest, Response>
         Get("posts");
         Verbs(Http.GET);
         Version(1);
+        AllowAnonymous();
     }
 
     public override async Task<Response> ExecuteAsync(GetPostsRequest req, CancellationToken ct)
@@ -20,7 +21,6 @@ internal sealed class Endpoint : Endpoint<GetPostsRequest, Response>
         {
             return this.ProblemDetails(result.Errors);
         }
-
         return TypedResults.Ok(result.Value.ToResponse());
     }
 }

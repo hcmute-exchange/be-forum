@@ -14,6 +14,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Post> Posts => Set<Post>();
     public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<Vote> Votes => Set<Vote>();
+    public DbSet<View> Views => Set<View>();
 
     public AppDbContext(DbContextOptions options) : base(options)
     {
@@ -23,7 +25,6 @@ public class AppDbContext : DbContext, IAppDbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
         var user = new User
         {
             Id = Guid.NewGuid(),

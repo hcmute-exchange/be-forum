@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NodaTime;
+using NpgsqlTypes;
 
 #nullable disable
 
@@ -107,7 +108,10 @@ namespace Human.WebServer.Migrations
                     UpdatedTime = table.Column<Instant>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp"),
                     Body = table.Column<string>(type: "text", nullable: false),
                     PostId = table.Column<Guid>(type: "uuid", nullable: true),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SearchVector = table.Column<NpgsqlTsVector>(type: "tsvector", nullable: false)
+                        .Annotation("Npgsql:TsVectorConfig", "english")
+                        .Annotation("Npgsql:TsVectorProperties", new[] { "Body" })
                 },
                 constraints: table =>
                 {
@@ -129,6 +133,9 @@ namespace Human.WebServer.Migrations
                     UpdatedTime = table.Column<Instant>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp"),
                     Subject = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     InitialMessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SearchVector = table.Column<NpgsqlTsVector>(type: "tsvector", nullable: false)
+                        .Annotation("Npgsql:TsVectorConfig", "english")
+                        .Annotation("Npgsql:TsVectorProperties", new[] { "Subject" }),
                     Tag = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -138,6 +145,33 @@ namespace Human.WebServer.Migrations
                         name: "FK_Posts_Messages_InitialMessageId",
                         column: x => x.InitialMessageId,
                         principalTable: "Messages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Votes",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MessageId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedTime = table.Column<Instant>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp"),
+                    UpdatedTime = table.Column<Instant>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp"),
+                    Weight = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Votes", x => new { x.UserId, x.MessageId });
+                    table.ForeignKey(
+                        name: "FK_Votes_Messages_MessageId",
+                        column: x => x.MessageId,
+                        principalTable: "Messages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Votes_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -166,21 +200,46 @@ namespace Human.WebServer.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Views",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedTime = table.Column<Instant>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp"),
+                    UpdatedTime = table.Column<Instant>(type: "timestamp with time zone", nullable: false, defaultValueSql: "current_timestamp"),
+                    PostId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Views", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Views_Posts_PostId",
+                        column: x => x.PostId,
+                        principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Email", "PasswordHash" },
-                values: new object[] { new Guid("8f80fd36-c152-418e-826e-b2d4b855d87a"), "admin@gmail.com", "$2a$11$kGq4IStaEyhrWWu9VmYVoOThQr0qmX1JFY.1vXN6GKadMJPSq52e." });
+                values: new object[] { new Guid("57cebff1-15ba-4786-870b-141bf0d08699"), "admin@gmail.com", "$2a$11$MC255/LaCFI./uqSdaa8xO7u.HOwDHJvVxT526mKYvqP5Xv63SBIq" });
 
             migrationBuilder.InsertData(
                 table: "UserPermissions",
                 columns: new[] { "Permission", "UserId" },
-                values: new object[] { "create_user", new Guid("8f80fd36-c152-418e-826e-b2d4b855d87a") });
+                values: new object[] { "create_user", new Guid("57cebff1-15ba-4786-870b-141bf0d08699") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_PostId",
                 table: "Messages",
-                column: "PostId",
-                unique: true);
+                column: "PostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SearchVector",
+                table: "Messages",
+                column: "SearchVector")
+                .Annotation("Npgsql:IndexMethod", "GIN");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_UserId",
@@ -192,6 +251,12 @@ namespace Human.WebServer.Migrations
                 table: "Posts",
                 column: "InitialMessageId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Posts_SearchVector",
+                table: "Posts",
+                column: "SearchVector")
+                .Annotation("Npgsql:IndexMethod", "GIN");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PostTag_TagsId",
@@ -210,12 +275,23 @@ namespace Human.WebServer.Migrations
                 column: "Email",
                 unique: true);
 
+            migrationBuilder.CreateIndex(
+                name: "IX_Views_PostId",
+                table: "Views",
+                column: "PostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Votes_MessageId",
+                table: "Votes",
+                column: "MessageId");
+
             migrationBuilder.AddForeignKey(
                 name: "FK_Messages_Posts_PostId",
                 table: "Messages",
                 column: "PostId",
                 principalTable: "Posts",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
@@ -236,6 +312,12 @@ namespace Human.WebServer.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserRefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "Views");
+
+            migrationBuilder.DropTable(
+                name: "Votes");
 
             migrationBuilder.DropTable(
                 name: "Tags");

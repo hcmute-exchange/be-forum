@@ -15,12 +15,18 @@ public sealed class MessageEntityConfiguration : IEntityTypeConfiguration<Messag
         builder.Property(x => x.UpdatedTime).ValueGeneratedOnAdd().HasDefaultValueSql("current_timestamp");
 
         builder.Property(x => x.Body).IsRequired();
-        builder.Property<Guid?>("PostId");
+        builder.Property<Guid?>("PostId").IsRequired(false);
         builder.Property<Guid>("UserId").IsRequired();
-        builder.HasOne(x => x.Post).WithOne().HasForeignKey<Message>("PostId");
+        builder.HasOne(x => x.Post).WithMany().HasForeignKey("PostId");
         builder.HasOne(x => x.User).WithMany().HasForeignKey("UserId").IsRequired();
-        builder.Navigation(x => x.Post).UsePropertyAccessMode(PropertyAccessMode.Property);
-        builder.Navigation(x => x.User).UsePropertyAccessMode(PropertyAccessMode.Property);
+        builder.HasGeneratedTsVectorColumn(
+           p => p.SearchVector,
+           "english",  // Text search config
+           p => p.Body)  // Included properties
+       .HasIndex(p => p.SearchVector)
+       .HasMethod("GIN");
+        // builder.Navigation(x => x.Post).UsePropertyAccessMode(PropertyAccessMode.Property);
+        // builder.Navigation(x => x.User).UsePropertyAccessMode(PropertyAccessMode.Property);
     }
 
 }

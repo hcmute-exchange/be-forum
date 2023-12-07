@@ -19,6 +19,12 @@ public sealed class PostEntityConfiguration : IEntityTypeConfiguration<Post>
         builder.HasOne(x => x.InitialMessage).WithOne().HasForeignKey<Post>("InitialMessageId").IsRequired();
         builder.Property<Guid>("Tag").IsRequired();
         builder.HasMany(x => x.Tags).WithMany();
+        builder.HasGeneratedTsVectorColumn(
+            p => p.SearchVector,
+            "english",  // Text search config
+            p => p.Subject)  // Included properties
+        .HasIndex(p => p.SearchVector)
+        .HasMethod("GIN");
         builder.Navigation(x => x.InitialMessage).UsePropertyAccessMode(PropertyAccessMode.Property);
         builder.Navigation(x => x.Tags).UsePropertyAccessMode(PropertyAccessMode.Property);
     }

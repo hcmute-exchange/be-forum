@@ -27,3 +27,4 @@ zzz:
     just mig add InitialCreate
     just db update
     just optimize
+

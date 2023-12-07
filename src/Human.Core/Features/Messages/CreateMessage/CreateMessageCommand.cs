@@ -9,6 +9,7 @@ public class CreateMessageCommand : ICommand<Result<Message>>
 {
     public required string Body { get; set; }
     public required Guid UserId { get; set; }
+    public required Guid PostId { get; set; }
 }
 
 [Mapper]

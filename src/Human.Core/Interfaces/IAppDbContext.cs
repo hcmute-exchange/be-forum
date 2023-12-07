@@ -13,6 +13,9 @@ public interface IAppDbContext
     DbSet<Message> Messages { get; }
     DbSet<Post> Posts { get; }
     DbSet<Tag> Tags { get; }
+    DbSet<Vote> Votes { get; }
+    DbSet<View> Views { get; }
+    ChangeTracker ChangeTracker { get; }
     EntityEntry Attach(object entity);
     EntityEntry Add(object entity);
     EntityEntry Update(object entity);

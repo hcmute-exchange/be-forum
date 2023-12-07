@@ -17,7 +17,7 @@ public sealed class GetPostsHandler : ICommandHandler<GetPostsCommand, Result<Po
 
     public async Task<Result<Post[]>> ExecuteAsync(GetPostsCommand command, CancellationToken ct)
     {
-        var posts = await dbContext.Posts.Include(x => x.InitialMessage).ThenInclude(x => x.User).Include(x => x.Tags).ToArrayAsync(ct);
+        var posts = await dbContext.Posts.Include(x => x.InitialMessage).ThenInclude(x => x.User).Include(x => x.InitialMessage).ThenInclude(x => x.Votes).Include(x => x.Tags).Include(x => x.Views).ToArrayAsync(ct);
         return posts;
     }
 }

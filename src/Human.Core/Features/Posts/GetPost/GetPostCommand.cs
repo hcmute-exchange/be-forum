@@ -2,9 +2,9 @@ using FastEndpoints;
 using FluentResults;
 using Human.Domain.Models;
 
-namespace Human.Core.Features.Posts.GetPost;
+namespace Human.Core.Features.Messages.GetMessage;
 
-public class GetPostCommand : ICommand<Result<Post>>
+public class GetMessageCommand : ICommand<Result<Message>>
 {
     public required Guid Id { get; set; }
 }

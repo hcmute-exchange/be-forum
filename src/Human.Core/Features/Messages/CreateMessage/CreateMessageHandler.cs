@@ -16,12 +16,26 @@ public sealed class CreateMessageHandler : ICommandHandler<CreateMessageCommand,
 
     public async Task<Result<Message>> ExecuteAsync(CreateMessageCommand command, CancellationToken ct)
     {
-        var any = await dbContext.Users.AnyAsync(x => x.Id == command.UserId, cancellationToken: ct)
-            .ConfigureAwait(false);
-        if (!any)
+        var anyUser = await dbContext.Users.AnyAsync(x => x.Id == command.UserId, cancellationToken: ct)
+        .ConfigureAwait(false);
+
+
+        if (!anyUser)
         {
-            return Result.Fail("Use does not exist")
+            return Result.Fail("User does not exist")
                .WithName(nameof(command.UserId))
+               .WithCode("invalid_user")
+               .WithStatus(HttpStatusCode.Unauthorized);
+        }
+        Console.WriteLine(command.PostId);
+        var anyPost = await dbContext.Posts.AnyAsync(x => x.Id == command.PostId, cancellationToken: ct)
+        .ConfigureAwait(false);
+
+
+        if (!anyPost)
+        {
+            return Result.Fail("Post doest not exist")
+               .WithName(nameof(command.PostId))
                .WithCode("invalid_user")
                .WithStatus(HttpStatusCode.Unauthorized);
         }
@@ -29,8 +43,15 @@ public sealed class CreateMessageHandler : ICommandHandler<CreateMessageCommand,
         {
             Id = command.UserId
         };
+        var post = new Post
+        {
+            Id = command.PostId
+        };
+
         var message = command.ToMessage(user);
+        message.Post = post;
         dbContext.Attach(user);
+        dbContext.Attach(post);
         dbContext.Add(message);
         await dbContext.SaveChangesAsync(ct).ConfigureAwait(false);
         return message;

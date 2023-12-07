@@ -8,9 +8,10 @@ internal sealed class Endpoint : Endpoint<GetPostRequest, Response>
 {
     public override void Configure()
     {
-        Get("posts/{Id}");
+        Get("post/{Id}");
         Verbs(Http.GET);
         Version(1);
+        AllowAnonymous();
     }
 
     public override async Task<Response> ExecuteAsync(GetPostRequest req, CancellationToken ct)

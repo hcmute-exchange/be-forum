@@ -1,16 +1,16 @@
+using System.Security.Claims;
 using FastEndpoints;
 using FluentValidation;
-using Human.Core.Features.Messages.CreateMessage;
-using Human.Core.Features.Posts.CreatePost;
-using Riok.Mapperly.Abstractions;
 
 namespace Human.WebServer.Api.V1.Posts.CreatePost;
 
 internal sealed class Request
 {
+    [FromClaim(ClaimTypes.NameIdentifier)]
+    public Guid UserId { get; set; }
     public string? Subject { get; set; }
-    public CreateMessageCommand? InitialMessage { get; set; }
-    public Guid[]? TagIds { get; set; }
+    public string? Body { get; set; }
+    public String[]? Name { get; set; }
 
 }
 internal sealed class Validator : Validator<Request>
@@ -19,18 +19,9 @@ internal sealed class Validator : Validator<Request>
     {
         RuleFor(x => x.Subject)
             .NotNull();
-        RuleFor(x => x.InitialMessage)
+        RuleFor(x => x.Body)
             .NotNull();
-        RuleFor(x => x.TagIds)
+        RuleFor(x => x.Name)
             .NotNull();
-
     }
-}
-
-
-[Mapper]
-internal static partial class RequestMapper
-{
-    public static partial CreatePostCommand ToCommand(this Request request);
-
 }

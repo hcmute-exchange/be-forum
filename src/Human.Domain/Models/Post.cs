@@ -1,6 +1,7 @@
 using NodaTime;
 
 namespace Human.Domain.Models;
+using NpgsqlTypes;
 
 public record class Post : IAggregationRoot
 {
@@ -10,4 +11,7 @@ public record class Post : IAggregationRoot
     public string Subject { get; set; } = null!;
     public Message InitialMessage { get; set; } = null!;
     public ICollection<Tag> Tags { get; set; } = new HashSet<Tag>();
+    public ICollection<View> Views { get; set; } = null!;
+    public NpgsqlTsVector SearchVector { get; set; }
+
 }
